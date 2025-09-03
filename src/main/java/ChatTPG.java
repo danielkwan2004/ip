@@ -6,10 +6,15 @@ public class ChatTPG {
         System.out.println("What can I do for you?");
         
         Scanner scanner = new Scanner(System.in);
-        String userInput = scanner.nextLine();
-        System.out.println("\t" + userInput);
-        // System.out.println("");
-        // System.out.println("You shut me down... how sad. Maybe we will meet again...");
+        String userInput = "";
+        while (!userInput.equals("bye")) {
+            userInput = scanner.nextLine();
+            if (userInput.equals("bye")) {
+                break;
+            }
+            System.out.println("\t" + userInput);
+        }
+        System.out.println("\tYou shut me down... how sad. Maybe we will meet again...");
     }
 }
 
