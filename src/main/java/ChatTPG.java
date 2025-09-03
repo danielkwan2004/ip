@@ -7,12 +7,19 @@ public class ChatTPG {
         
         Scanner scanner = new Scanner(System.in);
         String userInput = "";
+        
+        Task task = new Task();
+
         while (!userInput.equals("bye")) {
             userInput = scanner.nextLine();
+            if (userInput.equals("list")) {
+                task.listTask();
+                continue;
+            }
             if (userInput.equals("bye")) {
                 break;
             }
-            System.out.println("\t" + userInput);
+            task.addTask(userInput);
         }
         System.out.println("\tYou shut me down... how sad. Maybe we will meet again...");
     }
