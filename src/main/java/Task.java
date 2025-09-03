@@ -1,6 +1,5 @@
 public class Task {
 
-    private Boolean isDone;
     static int MAX_TASKS = 100;
 
     String[] taskList = new String[MAX_TASKS];
@@ -20,17 +19,40 @@ public class Task {
     }    
 
     public void markTaskAsDone(int taskNumber) {
-        if (taskNumber < 0 || taskNumber >= 100) {
+        if (taskNumber < 0 || taskNumber >= taskCount) {
             System.out.println("You have gone out of bounds. This task number does not exist.");
             return;
         }
         int taskIndex = taskNumber - 1;
-        taskList[taskCount]
-        System.out.println("Nice! I've marked task number %d as done. The following is the name of the task: ", taskNumber);
-        System.out.println("  " + )
+        taskList[taskIndex] = "[X] " + taskList[taskIndex].substring(4);
+        System.out.printf("Nice! I've marked task number %d as done. The following is the name of the task: \n", taskNumber);
+        System.out.println("  " + taskList[taskIndex]);
+    }
 
+    public void markTaskAsUndone(int taskNumber) {
+        if (taskNumber < 0 || taskNumber >= taskCount) {
+            System.out.println("You have gone out of bounds. This task number does not exist.");
+            return;
+        }
+        int taskIndex = taskNumber - 1;
+        taskList[taskIndex] = "[ ] " + taskList[taskIndex].substring(4);
+        System.out.printf("Noted. I've marked task number %d as undone. The following is the name of the task: \n", taskNumber);
+        System.out.println("  " + taskList[taskIndex]);
+    }
 
-
+    public void deleteTask(int taskNumber) {
+        if (taskNumber < 0 || taskNumber >= taskCount) {
+            System.out.println("You have gone out of bounds. This task number does not exist.");
+            return;
+        }
+        int taskIndex = taskNumber - 1;
+        System.out.printf("Noted. I've removed task number %d. The following is the name of the task: \n", taskNumber);
+        System.out.println("  " + taskList[taskIndex]);
+        for (int i = taskIndex; i < taskCount - 1; i++) {
+            taskList[i] = taskList[i + 1];
+        }
+        taskList[taskCount - 1] = null; // Clear the last element
+        taskCount--;
     }
 
 }
