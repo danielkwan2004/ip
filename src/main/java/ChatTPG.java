@@ -12,12 +12,11 @@ public class ChatTPG {
         System.out.println("Hello! I'm ChatTPG. What can I do for you?");
 
         Scanner scanner = new Scanner(System.in);
-        Task task = new Task();
-        TaskOrganiser organiser = new TaskOrganiser(scanner, task);
+        TaskOrganiser organiser = new TaskOrganiser(scanner);
 
         while (true) {
             System.out.println(MAIN_MENU);
-            System.out.println("open task organiser\nbye (to exit)");
+            System.out.println("➣ open task organiser\n➣ bye (to exit)");
             String input = scanner.nextLine();
             switch (input) {
             case "open task organiser":
@@ -27,6 +26,7 @@ public class ChatTPG {
                 break;
             default:
                 System.out.println("Unknown command. Please try again.");
+                break;
             }
             if (input.equals("bye")) {
                 break;
