@@ -1,18 +1,22 @@
 import java.util.Scanner;
 
 public class TaskOrganiser {
-    static final int MAX_TASKS = 100;
-    Task[] tasks = new Task[MAX_TASKS];
-    private Scanner scanner;
+    private static final int MAX_TASKS = 100;
+    private final Task[] tasks = new Task[MAX_TASKS];
+    private final Scanner scanner;
     private int taskCount = 0;
 
     public TaskOrganiser(Scanner scanner) {
         this.scanner = scanner;
     }
 
+    public void printBoundsError() {
+        System.out.println("You have gone out of bounds. This task number does not exist.");
+    }
+
     public void deleteTask(int taskNumber) {
-        if (taskNumber < 0 || taskNumber >= taskCount) {
-            System.out.println("You have gone out of bounds. This task number does not exist.");
+        if (taskNumber < 1 || taskNumber > taskCount) {
+            printBoundsError();
             return;
         }
         int taskIndex = taskNumber - 1;
@@ -26,14 +30,29 @@ public class TaskOrganiser {
     }
 
     public void addTask(String description) {
-        if (description.startsWith("todo")) {
-            tasks[taskCount] = new Todo(description);
+        if (taskCount >= MAX_TASKS) {
+            System.out.println("Task list is full. You cannot add more tasks.");
+            return;
         } else if (description.startsWith("deadline")) {
-            String[] parts = description.split(" /by ");
-            tasks[taskCount] = new Deadline(parts[0], parts[1]);
+            String[] parts = description.split(" /by ", 2);
+            if (parts.length < 2) {
+                System.out.println("Invalid deadline format. Use: deadline <desc> /by <when>");
+                return;
+            }
+            tasks[taskCount] = new Deadline(parts[0].trim(), parts[1].trim());
         } else if (description.startsWith("event")) {
-            String[] parts = description.split(" /from | /to ");
-            tasks[taskCount] = new Events(parts[0], parts[1], parts[2]);
+            int fromPos = description.indexOf(" /from ");
+            int toPos = description.indexOf(" /to ");
+            if (fromPos == -1 || toPos == -1 || fromPos > toPos) {
+                System.out.println("Invalid event format. Use event <desc> /from <start> /to <end>");
+                return;
+            }
+            String desc = description.substring(0, fromPos).trim();
+            String start = description.substring(fromPos + 7, toPos).trim();
+            String end = description.substring(toPos + 5).trim();
+            tasks[taskCount] = new Event(desc, start, end);
+        } else if (description.startsWith("todo")) {
+            tasks[taskCount] = new Todo(description);
         } else {
             System.out.println("Unknown task type. Please use 'todo', 'deadline', or 'event'.");
             return;
@@ -42,10 +61,13 @@ public class TaskOrganiser {
         taskAdded();
     }
 
-    public void listTask() {
+    public void listTasks() {
+        if (taskCount == 0) {
+            System.out.println("You have no tasks in your list.");
+            return;
+        }
         System.out.println("Here are the tasks in your list: ");
         for (int i = 0; i < taskCount; i++) {
-            // add some if statement to check if task is done or not
             System.out.println("\t" + (i + 1) + ". " + tasks[i].toString());
         }
     }
@@ -53,25 +75,23 @@ public class TaskOrganiser {
     public void taskAdded() {
         System.out.println("\tGot it. I've added this task: ");
         System.out.println("\t  " + tasks[taskCount - 1].toString());
-        System.out.printf("\tNow you have %d tasks in the list.\n", taskCount);
+        System.out.printf("\tNow you have %d tasks in the list.%n", taskCount);
     }
 
     public void run() {
         System.out.println("Welcome to Task Organiser!");
         System.out.println("You can add, delete, or modify tasks.");
         
-
-        String userInput = "";
         while (true) {
-            userInput = scanner.nextLine();
+            final String userInput = scanner.nextLine().trim();
             switch (userInput) {
                 case "mark done":
                     System.out.println("Enter the task number you want to mark as done: ");
                     int doneTaskNumber = scanner.nextInt();
                     scanner.nextLine();
                     if (doneTaskNumber < 1 || doneTaskNumber > taskCount) {
-                        System.out.println("You have gone out of bounds. This task number does not exist.");
-                        break;
+                        printBoundsError();
+                        continue;
                     }
                     tasks[doneTaskNumber - 1].markTaskAsDone();
                     break;
@@ -80,7 +100,7 @@ public class TaskOrganiser {
                     int undoneTaskNumber = scanner.nextInt();
                     scanner.nextLine();
                     if (undoneTaskNumber < 1 || undoneTaskNumber > taskCount) {
-                        System.out.println("You have gone out of bounds. This task number does not exist.");
+                        printBoundsError();
                         break;
                     }
                     tasks[undoneTaskNumber - 1].markTaskAsUndone();
@@ -90,13 +110,13 @@ public class TaskOrganiser {
                     int deleteTaskNumber = scanner.nextInt();
                     scanner.nextLine();
                     if (deleteTaskNumber < 1 || deleteTaskNumber > taskCount) {
-                        System.out.println("You have gone out of bounds. This task number does not exist.");
+                        printBoundsError();
                         break;
                     }
                     deleteTask(deleteTaskNumber);
                     break;
                 case "list":
-                    listTask();
+                    listTasks();
                     break;
                 case "exit task organiser":
                 case "bye":
