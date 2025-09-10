@@ -1,4 +1,5 @@
 package chattpg.model;
+import static chattpg.model.Task.requireNonBlank;
 
 public class Event extends Task { 
     private final String from;
@@ -6,8 +7,11 @@ public class Event extends Task {
 
     public Event(String description, String from, String to) {
         super(description);
-        this.from = from;
-        this.to = to;
+        this.from = requireNonBlank(from, "event (/from)");
+        this.to = requireNonBlank(to, "event (/to)");
+        if (this.from.equals(this.to)) {
+            throw new IllegalArgumentException("/from and /to must differ");
+        }
     }
 
     @Override

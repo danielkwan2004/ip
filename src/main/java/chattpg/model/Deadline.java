@@ -1,4 +1,5 @@
 package chattpg.model;
+import static chattpg.model.Task.requireNonBlank;
 
 public class Deadline extends Task {
 
@@ -6,7 +7,7 @@ public class Deadline extends Task {
 
     public Deadline(String description, String by) {
         super(description);
-        this.by = by;
+        this.by = requireNonBlank(by, "deadline (/by)");
     }
 
     @Override

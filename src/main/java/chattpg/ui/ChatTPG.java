@@ -1,7 +1,7 @@
 package chattpg.ui;
 
-import java.util.Scanner;
 import chattpg.logic.TaskOrganiser;
+import java.util.Scanner;
 
 
 public class ChatTPG {
@@ -13,16 +13,22 @@ public class ChatTPG {
     *                                          *
     ********************************************
     """;
+    private static final String LINE = "---------------------------------------------";
 
     private static void printMainMenu() {
-    System.out.println(MAIN_MENU);
-    System.out.println("➣ open task organiser");
-    System.out.println("➣ bye (to exit)");
+        System.out.println(MAIN_MENU);
+        System.out.println("➣ open task organiser");
+        System.out.println("➣ bye (to exit)");
+    }
+
+    private static void greetUser() {
+        System.out.println("Hello! I'm ChatTPG.");
+        System.out.println("What can I do for you?");
+        System.out.println(LINE);
     }
 
     public static void main(String[] args) {
-        System.out.println("Hello! I'm ChatTPG. What can I do for you?");
-
+        greetUser();
         try (Scanner scanner = new Scanner(System.in)) {
             TaskOrganiser organiser = new TaskOrganiser(scanner);
             while (true) {
@@ -30,7 +36,11 @@ public class ChatTPG {
                 final String input = scanner.nextLine().trim().toLowerCase();
                 switch (input) {
                 case "open task organiser":
-                    organiser.run();
+                    try {
+                        organiser.run(); // catch unexpected runtime errors from the organiser
+                    } catch (RuntimeException ex) {
+                        System.out.println("Something went wrong in Task Organiser: " + ex.getMessage());
+                    }
                     break;
                 case "bye":
                     System.out.println("\tYou shut me down... how sad. Maybe we will meet again...");
