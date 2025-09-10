@@ -1,6 +1,5 @@
-// a generic task has a description and status of done or not done
-// the description is in the form of "[ ]" + description in a string format.
-// this class is for each individual task, not the list of tasks.
+package chattpg.model;
+
 public class Task {
     private boolean done;
     protected String description;

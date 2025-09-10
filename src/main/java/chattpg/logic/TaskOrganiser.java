@@ -1,4 +1,10 @@
+package chattpg.logic;
+
 import java.util.Scanner;
+import chattpg.model.Task;
+import chattpg.model.Todo;
+import chattpg.model.Deadline;
+import chattpg.model.Event;
 
 public class TaskOrganiser {
     private static final int MAX_TASKS = 100;

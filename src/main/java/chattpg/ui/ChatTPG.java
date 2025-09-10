@@ -1,4 +1,8 @@
+package chattpg.ui;
+
 import java.util.Scanner;
+import chattpg.logic.TaskOrganiser;
+
 
 public class ChatTPG {
 
