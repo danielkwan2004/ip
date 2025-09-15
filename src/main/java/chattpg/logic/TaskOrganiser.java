@@ -134,19 +134,25 @@ public class TaskOrganiser {
         System.out.println("  " + tasks.get(taskIndex));
         tasks.remove(taskIndex);
         System.out.println(LINE);
-        System.out.printf("Now you have %d tasks in the list.%n", tasks.size());
+        if (tasks.size() == 1) {
+            System.out.println("Now you have 1 task in the list.");
+        } else {
+            System.out.printf("Now you have %d tasks in the list.%n", tasks.size());
+        }
         System.out.println(LINE);
         saveTasksToFile();
     }
 
     public void addTask(String description) throws TaskListFullException, InvalidCommandException, TaskIndexOutOfBoundsException {
         if (description.startsWith("deadline")) {
+            description = description.substring("deadline".length()).trim();
             String[] parts = description.split(" /by ", 2);
             if (parts.length < 2) {
                 throw new InvalidCommandException("deadline format: deadline <desc> /by <when>" + System.lineSeparator() + LINE);
             }
             tasks.add(new Deadline(parts[0].trim(), parts[1].trim()));
         } else if (description.startsWith("event")) {
+            description = description.substring("event".length()).trim();
             int fromPos = description.indexOf(" /from ");
             int toPos = description.indexOf(" /to ");
             if (fromPos == -1 || toPos == -1 || fromPos > toPos) {
