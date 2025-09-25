@@ -74,6 +74,11 @@ public class TaskOrganiser {
         printEnterCommand();
     }
 
+    public void findTask(String keyword) throws InvalidCommandException {
+        actions.findTask(keyword);
+        printEnterCommand();
+    }
+
     public void taskAdded() { /* delegated in TaskActions */ }
 
     public void run() {
@@ -86,41 +91,47 @@ public class TaskOrganiser {
             System.out.println(LINE);
             try {
                 switch (userInput) {
-                    case "help":
-                        printAvailableCommands();
-                        break;
-                    case "mark done":
-                        System.out.println("Enter the task number you want to mark as done: ");
-                        int doneTaskNumber = Integer.parseInt(scanner.nextLine().trim());
-                        System.out.println(LINE);
-                        actions.markDone(doneTaskNumber);
-                        printEnterCommand();
-                        break;
-                    case "mark undone":
-                        System.out.println("Enter the task number you want to mark as undone: ");
-                        int undoneTaskNumber = Integer.parseInt(scanner.nextLine().trim());
-                        System.out.println(LINE);
-                        actions.markUndone(undoneTaskNumber);
-                        printEnterCommand();
-                        break;
-                    case "delete task":
-                        System.out.println("Enter the task number you want to delete: ");
-                        int deleteTaskNumber = Integer.parseInt(scanner.nextLine().trim());
-                        System.out.println(LINE);
-                        deleteTask(deleteTaskNumber);
-                        break;
-                    case "list":
-                        listTasks();
-                        break;
-                    case "exit task organiser":
-                    case "bye":
-                        System.out.println("Exiting Task Organiser. Returning to main menu...");
-                        System.out.println("Type bye again to exit the whole program.");
-                        System.out.println(LINE);
-                        return;
-                    default:
-                        addTask(userInput);
-                        break;
+                case "help":
+                    printAvailableCommands();
+                    break;
+                case "mark done":
+                    System.out.println("Enter the task number you want to mark as done: ");
+                    int doneTaskNumber = Integer.parseInt(scanner.nextLine().trim());
+                    System.out.println(LINE);
+                    actions.markDone(doneTaskNumber);
+                    printEnterCommand();
+                    break;
+                case "mark undone":
+                    System.out.println("Enter the task number you want to mark as undone: ");
+                    int undoneTaskNumber = Integer.parseInt(scanner.nextLine().trim());
+                    System.out.println(LINE);
+                    actions.markUndone(undoneTaskNumber);
+                    printEnterCommand();
+                    break;
+                case "delete task":
+                    System.out.println("Enter the task number you want to delete: ");
+                    int deleteTaskNumber = Integer.parseInt(scanner.nextLine().trim());
+                    System.out.println(LINE);
+                    deleteTask(deleteTaskNumber);
+                    break;
+                case "list":
+                    listTasks();
+                    break;
+                case "exit task organiser":
+                case "bye":
+                    System.out.println("Exiting Task Organiser. Returning to main menu...");
+                    System.out.println("Type bye again to exit the whole program.");
+                    System.out.println(LINE);
+                    return;
+                case "find":
+                    System.out.println("Enter a single keyword to show a list of tasks that has that keyword in the description");
+                    String keyword = scanner.nextLine().trim();
+                    System.out.println(LINE);
+                    findTask(keyword);
+                    break;
+                default:
+                    addTask(userInput);
+                    break;
                 }
             } catch (TaskIndexOutOfBoundsException e) {
                 System.out.println(e.getMessage());

@@ -120,6 +120,26 @@ public class TaskActions {
         saveToFile();
     }
 
+    public void findTask(String keyword) throws InvalidCommandException{
+            String trimmed = keyword == null ? "" : keyword.trim();
+        // Must be exactly one non-whitespace token
+        if (!trimmed.matches("\\S+")) {
+            throw new InvalidCommandException("Keyword must be a single word." + System.lineSeparator() + lineSep);
+        }
+        System.out.println("Here are the matching tasks in your list: ");
+        int count = 0;
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i).getDescription().toLowerCase().contains(trimmed.toLowerCase())) {
+                System.out.println("\t" + (i + 1) + ". " + tasks.get(i).toString());
+                count++;
+            }
+        }
+        if (count == 0) {
+            System.out.println("\tNo matching tasks found.");
+        }
+        System.out.println(lineSep);
+    }
+
     private void taskAdded() {
         System.out.println("\tGot it. I've added this task: ");
         System.out.println("\t  " + tasks.get(tasks.size() - 1).toString());
