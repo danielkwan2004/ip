@@ -2,3 +2,4 @@ T | 1 | read book
 D | 0 | return book | June 6th
 E | 1 | project meeting | Aug 6th 2pm | Aug 6th 4pm
 T | 0 | join sports club
+E | 0 | Daniel attend CS2113 lecture Friday 19 Sep 2025 | 4pm | 6pm
