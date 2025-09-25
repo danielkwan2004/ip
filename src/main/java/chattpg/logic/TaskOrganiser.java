@@ -1,13 +1,9 @@
 package chattpg.logic;
 
-import chattpg.model.Deadline;
-import chattpg.model.Event;
+import chattpg.logic.exceptions.InvalidCommandException;
+import chattpg.logic.exceptions.TaskIndexOutOfBoundsException;
 import chattpg.model.Task;
-import chattpg.model.Todo;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import chattpg.storage.Storage;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -23,84 +19,25 @@ public class TaskOrganiser {
     private static final String LINE = "---------------------------------------------";
     private final ArrayList<Task> tasks = new ArrayList<>();
     private final Scanner scanner;
+    private final Storage storage = new Storage("tasks/tasks.txt");
+    private final TaskActions actions = new TaskActions(tasks, storage, LINE);
 
     public TaskOrganiser(Scanner scanner) {
         this.scanner = scanner;
     }
 
     public void loadTasksFromFile() {
-    File file = new File("tasks/tasks.txt");
-        if (!file.exists()) {
-            System.out.println("No existing task file found. Starting with an empty task list.");
-            return;
-        }
-        try (Scanner fileScanner = new Scanner(file)) {
-            while (fileScanner.hasNextLine()) {
-                String line = fileScanner.nextLine();
-                String[] parts = line.split(" \\| ");
-                String type = parts[0];
-                boolean isDone = parts[1].equals("1");
-                String description = parts[2];
-                Task task = null;
-                switch (type) {
-                case "T":
-                    task = new Todo(description);
-                    break;
-                case "D":
-                    if (parts.length < 4) {
-                        System.out.println("Invalid deadline format in file: " + line);
-                        continue;
-                    }
-                    String by = parts[3];
-                    task = new Deadline(description, by);
-                    break;
-                case "E":
-                    if (parts.length < 5) {
-                        System.out.println("Invalid event format in file: " + line);
-                        continue;
-                    }
-                    String from = parts[3];
-                    String to = parts[4];
-                    task = new Event(description, from, to);
-                    break;
-                default:
-                    System.out.println("Unknown task type in file: " + line);
-                    continue;
-                }
-                if (task != null) {
-                    if (isDone) {
-                        task.markTaskAsDone();
-                    }
-                    tasks.add(task);
-                }
-            }
-            System.out.printf("Loaded %d tasks from file.%n", tasks.size());
-        } catch (FileNotFoundException e) {
-            System.out.println("Error loading tasks from file: " + e.getMessage());
-        } catch (IllegalStateException e) {
-            System.out.println("Error marking task as done: " + e.getMessage());
-        }
+        actions.loadFromFile();
     }
     
     public void saveTasksToFile() {
-        File file = new File("tasks/tasks.txt");
-        file.getParentFile().mkdirs();
-        try (FileWriter writer = new FileWriter(file, false)) {
-            for (Task t : tasks) {
-                String doneFlag = t.isDone() ? "1" : "0";
-                if (t instanceof Todo) {
-                    writer.write("T | " + doneFlag + " | " + t.getDescription() + System.lineSeparator());
-                } else if (t instanceof Deadline d) {
-                    writer.write("D | " + doneFlag + " | " + d.getDescription() + " | " + d.getBy() + System.lineSeparator());
-                } else if (t instanceof Event e) {
-                    writer.write("E | " + doneFlag + " | " + e.getDescription() + " | " + e.getFrom() + " | " + e.getTo() + System.lineSeparator());
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error saving tasks to file: " + e.getMessage());
-        }
+        actions.saveToFile();
     }
     
+    public void printEnterCommand() {
+        System.out.println("Please enter your command:");
+        System.out.println(LINE);
+    }
 
     public void printAvailableCommands() {
         System.out.println("Available commands:");
@@ -119,89 +56,30 @@ public class TaskOrganiser {
         System.out.println("You can manage your tasks here.");
         System.out.println(LINE);
         printAvailableCommands();
-        System.out.println("Please enter your command:");
-        System.out.println(LINE);
     }
 
 
     public void deleteTask(int taskNumber) throws TaskIndexOutOfBoundsException {
-        if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new TaskIndexOutOfBoundsException("Task " + taskNumber + " does not exist." + System.lineSeparator() + "You only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + LINE);
-        }
-        int taskIndex = taskNumber - 1;
-        System.out.printf("Noted. I've removed task number %d. The following is the name of the task: \n", taskNumber);
-        System.out.println(LINE);
-        System.out.println("  " + tasks.get(taskIndex));
-        tasks.remove(taskIndex);
-        System.out.println(LINE);
-        if (tasks.size() == 1) {
-            System.out.println("Now you have 1 task in the list.");
-        } else {
-            System.out.printf("Now you have %d tasks in the list.%n", tasks.size());
-        }
-        System.out.println(LINE);
-        saveTasksToFile();
+        actions.deleteTask(taskNumber);
+        printEnterCommand();
     }
 
-    public void addTask(String description) throws TaskListFullException, InvalidCommandException, TaskIndexOutOfBoundsException {
-        if (description.startsWith("deadline")) {
-            description = description.substring("deadline".length()).trim();
-            String[] parts = description.split(" /by ", 2);
-            if (parts.length < 2) {
-                throw new InvalidCommandException("deadline format: deadline <desc> /by <when>" + System.lineSeparator() + LINE);
-            }
-            tasks.add(new Deadline(parts[0].trim(), parts[1].trim()));
-        } else if (description.startsWith("event")) {
-            description = description.substring("event".length()).trim();
-            int fromPos = description.indexOf(" /from ");
-            int toPos = description.indexOf(" /to ");
-            if (fromPos == -1 || toPos == -1 || fromPos > toPos) {
-                throw new InvalidCommandException("event format: event <desc> /from <start> /to <end>" + System.lineSeparator() + LINE);
-            }
-            String desc = description.substring(0, fromPos).trim();
-            String start = description.substring(fromPos + 7, toPos).trim();
-            String end = description.substring(toPos + 5).trim();
-            if (desc.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                throw new InvalidCommandException("event parts must not be empty." + System.lineSeparator() + LINE);
-            }
-            tasks.add(new Event(desc, start, end));
-        } else if (description.startsWith("todo")) {
-            String desc = description.substring("todo".length()).trim();
-            if (desc.isEmpty()) {
-                throw new InvalidCommandException("todo requires a description." + System.lineSeparator() + LINE);
-            }
-            tasks.add(new Todo(desc));
-        } else {
-            throw new InvalidCommandException("Unknown command. Type help for available commands." + System.lineSeparator() + LINE);
-        }
-        taskAdded();
-        saveTasksToFile();
+    public void addTask(String description) throws InvalidCommandException {
+        actions.addTask(description);
+        printEnterCommand();
     }
 
     public void listTasks() {
-        if (tasks.isEmpty()) {
-            System.out.println("You have no tasks in your list.");
-            System.out.println(LINE);
-            return;
-        }
-        System.out.println("Here are the tasks in your list: ");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println("\t" + (i + 1) + ". " + tasks.get(i).toString());
-        }
-        System.out.println(LINE);
+        actions.listTasks();
+        printEnterCommand();
     }
 
-    public void taskAdded() {
-        System.out.println("\tGot it. I've added this task: ");
-        System.out.println("\t  " + tasks.get(tasks.size() - 1).toString());
-        System.out.printf("\tNow you have %d tasks in the list.%n", tasks.size());
-        System.out.println(LINE);
-    }
+    public void taskAdded() { /* delegated in TaskActions */ }
 
     public void run() {
         printWelcomeMessage();
-
         loadTasksFromFile();
+        printEnterCommand();
 
         while (true) {
             final String userInput = scanner.nextLine().trim();
@@ -215,35 +93,20 @@ public class TaskOrganiser {
                         System.out.println("Enter the task number you want to mark as done: ");
                         int doneTaskNumber = Integer.parseInt(scanner.nextLine().trim());
                         System.out.println(LINE);
-                        if (doneTaskNumber < 1 || doneTaskNumber > tasks.size()) {
-                            throw new TaskIndexOutOfBoundsException("Task " + doneTaskNumber + " does not exist.\nYou only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + LINE);
-                        }
-                        tasks.get(doneTaskNumber - 1).markTaskAsDone();
-                        System.out.println("Nice! I've marked this task as done:");
-                        System.out.println(LINE);
-                        System.out.println("\t" + tasks.get(doneTaskNumber - 1));
-                        saveTasksToFile();
+                        actions.markDone(doneTaskNumber);
+                        printEnterCommand();
                         break;
                     case "mark undone":
                         System.out.println("Enter the task number you want to mark as undone: ");
                         int undoneTaskNumber = Integer.parseInt(scanner.nextLine().trim());
                         System.out.println(LINE);
-                        if (undoneTaskNumber < 1 || undoneTaskNumber > tasks.size()) {
-                            throw new TaskIndexOutOfBoundsException("Task " + undoneTaskNumber + " does not exist.\nYou only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + LINE);
-                        }
-                        tasks.get(undoneTaskNumber - 1).markTaskAsUndone();
-                        System.out.println("Nice! I've marked this task as undone:");
-                        System.out.println(LINE);
-                        System.out.println("\t" + tasks.get(undoneTaskNumber - 1));
-                        saveTasksToFile();
+                        actions.markUndone(undoneTaskNumber);
+                        printEnterCommand();
                         break;
                     case "delete task":
                         System.out.println("Enter the task number you want to delete: ");
                         int deleteTaskNumber = Integer.parseInt(scanner.nextLine().trim());
                         System.out.println(LINE);
-                        if (deleteTaskNumber < 1 || deleteTaskNumber > tasks.size()) {
-                            throw new TaskIndexOutOfBoundsException("Task " + deleteTaskNumber + " does not exist.\nYou only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + LINE);
-                        }
                         deleteTask(deleteTaskNumber);
                         break;
                     case "list":
@@ -259,8 +122,6 @@ public class TaskOrganiser {
                         addTask(userInput);
                         break;
                 }
-            } catch (TaskListFullException e) {
-                System.out.println("Cannot add task: " + e.getMessage());
             } catch (TaskIndexOutOfBoundsException e) {
                 System.out.println(e.getMessage());
             } catch (InvalidCommandException e) {

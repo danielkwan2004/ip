@@ -1,4 +1,4 @@
-package chattpg.logic;
+package chattpg.logic.exceptions;
 
 public class InvalidCommandException extends Exception {
     public InvalidCommandException(String message) {
