@@ -10,18 +10,35 @@ import chattpg.storage.Storage;
 
 import java.util.ArrayList;
 
+/**
+ * Encapsulates all task-related operations and persistence hooks for the
+ * Task Organiser feature. This class is the domain layer that manipulates the
+ * in-memory list and delegates save/load to {@link chattpg.storage.Storage}.
+ */
 public class TaskActions {
     private final ArrayList<Task> tasks;
     private final Storage storage;
     private final String lineSep;
     private boolean loaded = false;
 
+    /**
+     * Constructs a new TaskActions facade.
+     *
+     * @param tasks   the backing in-memory task list managed by this instance
+     * @param storage the storage component used to persist tasks
+     * @param lineSep the UI separator used for consistent console output
+     */
     public TaskActions(ArrayList<Task> tasks, Storage storage, String lineSep) {
         this.tasks = tasks;
         this.storage = storage;
         this.lineSep = lineSep;
     }
 
+    /**
+     * Loads tasks from storage into the in-memory list on the first call.
+     * Subsequent calls are idempotent and will not reload (avoiding duplication).
+     * Always prints the current number of tasks after ensuring the list is loaded.
+     */
     public void loadFromFile() {
         if (!loaded) {
             tasks.clear();
@@ -32,10 +49,17 @@ public class TaskActions {
         printNumberOfTasks();
     }
 
+    /**
+     * Persists the current in-memory task list to storage.
+     */
     public void saveToFile() {
         storage.save(tasks);
     }
 
+    /**
+     * Prints the full list of tasks with 1-based indices. If the list is empty,
+     * prints a friendly message instead.
+     */
     public void listTasks() {
         if (tasks.isEmpty()) {
             System.out.println("You have no tasks in your list.");
@@ -49,6 +73,19 @@ public class TaskActions {
         System.out.println(lineSep);
     }
 
+    /**
+     * Parses the user input and appends a new task.
+     *
+     * Supported formats:
+     * - todo <desc>
+     * - deadline <desc> /by <when>
+     * - event <desc> /from <start> /to <end>
+     *
+     * On success, prints a confirmation and triggers an autosave.
+     *
+     * @param description the raw user input for the add command
+     * @throws InvalidCommandException if the input is malformed or unknown
+     */
     public void addTask(String description) throws InvalidCommandException {
         if (description.startsWith("deadline")) {
             description = description.substring("deadline".length()).trim();
@@ -84,6 +121,12 @@ public class TaskActions {
         saveToFile();
     }
 
+    /**
+     * Deletes a task by 1-based index, prints confirmation, and autosaves.
+     *
+     * @param taskNumber the 1-based index of the task to delete
+     * @throws TaskIndexOutOfBoundsException if the index is invalid
+     */
     public void deleteTask(int taskNumber) throws TaskIndexOutOfBoundsException {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new TaskIndexOutOfBoundsException("Task " + taskNumber + " does not exist." + System.lineSeparator() + "You only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + lineSep);
@@ -98,6 +141,13 @@ public class TaskActions {
         saveToFile();
     }
 
+    /**
+     * Marks a task as done by 1-based index and autosaves.
+     *
+     * @param taskNumber the 1-based index of the task to mark done
+     * @throws TaskIndexOutOfBoundsException if the index is invalid
+     * @throws IllegalStateException         if the state transition is not allowed
+     */
     public void markDone(int taskNumber) throws TaskIndexOutOfBoundsException, IllegalStateException {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new TaskIndexOutOfBoundsException("Task " + taskNumber + " does not exist." + System.lineSeparator() + "You only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + lineSep);
@@ -109,6 +159,13 @@ public class TaskActions {
         saveToFile();
     }
 
+    /**
+     * Marks a task as not done by 1-based index and autosaves.
+     *
+     * @param taskNumber the 1-based index of the task to mark undone
+     * @throws TaskIndexOutOfBoundsException if the index is invalid
+     * @throws IllegalStateException         if the state transition is not allowed
+     */
     public void markUndone(int taskNumber) throws TaskIndexOutOfBoundsException, IllegalStateException {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new TaskIndexOutOfBoundsException("Task " + taskNumber + " does not exist." + System.lineSeparator() + "You only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + lineSep);
@@ -120,6 +177,14 @@ public class TaskActions {
         saveToFile();
     }
 
+    /**
+     * Finds and prints tasks whose description contains the given single-word
+     * keyword (case-insensitive). Multi-word inputs (containing whitespace)
+     * are rejected with an {@link InvalidCommandException}.
+     *
+     * @param keyword a single token to match within task descriptions
+     * @throws InvalidCommandException if the keyword is empty or contains whitespace
+     */
     public void findTask(String keyword) throws InvalidCommandException{
             String trimmed = keyword == null ? "" : keyword.trim();
         // Must be exactly one non-whitespace token
@@ -140,6 +205,9 @@ public class TaskActions {
         System.out.println(lineSep);
     }
 
+    /**
+     * Prints the confirmation for the most recently added task and the count.
+     */
     private void taskAdded() {
         System.out.println("\tGot it. I've added this task: ");
         System.out.println("\t  " + tasks.get(tasks.size() - 1).toString());
@@ -147,6 +215,9 @@ public class TaskActions {
         printNumberOfTasks();
     }
 
+    /**
+     * Prints the current number of tasks in the list with singular/plural form.
+     */
     private void printNumberOfTasks() {
         if (tasks.size() == 1) {
             System.out.println("Now you have 1 task in the list.");
