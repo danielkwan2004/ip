@@ -22,15 +22,23 @@ Need help inside the Task Organiser? Type `help`.
 
 ---
 ## 2. Main Menu Commands
+
+<br/>
+
 | Command | Action |
 |---------|--------|
 | `open task organiser` | Enter the task management interface |
 | `bye` | Exit the whole application (from main menu) |
 
+<br/>
+
 When inside the organiser, `bye` or `exit task organiser` returns you to the main menu instead of quitting immediately.
 
 ---
 ## 3. Task Organiser Commands
+
+<br/>
+
 | Command Pattern | Description | Example |
 |-----------------|-------------|---------|
 | `todo <desc>` | Add a todo task | `todo read book` |
@@ -44,6 +52,8 @@ When inside the organiser, `bye` or `exit task organiser` returns you to the mai
 | `help` | Show command summary | `help` |
 | `exit task organiser` / `bye` | Return to main menu | `bye` |
 
+<br/>
+
 Notes:
 * The `find` feature only accepts one word (no spaces). If you enter multiple words it will warn you.
 * Task numbers are 1‑based (as shown in the `list` output).
@@ -52,14 +62,16 @@ Notes:
 ---
 ## 4. Task Display Format
 Each listed task looks like:
+
 ```
 1. [T][ ] read book
-2. [D][X] return book (by: 2025-10-01)
+2. [D][✓] return book (by: 2025-10-01)
 3. [E][ ] project meeting (from: 2025-10-03 1400 to: 2025-10-03 1600)
 ```
+
 Legend:
 * First bracket: Task type (`T`, `D`, `E`).
-* Second bracket: Status – `[X]` done, `[ ]` not done.
+* Second bracket: Status – `[✓]` done, `[ ]` not done.
 
 ---
 ## 5. Storage Format
@@ -107,12 +119,17 @@ book
 
 ---
 ## 7. Error Handling & Tips
+
+<br/>
+
 | Situation | What Happens |
 |-----------|--------------|
 | Unknown command | Shows an error + how to view help |
 | Invalid task number | Explains valid range |
 | Malformed add command | Shows correct format example |
-| Multi-word search keyword | Rejected with a hint to use a single word |
+| Multi-word search keyword | Rejected (keyword must be exactly one word) |
+
+<br/>
 
 Tips:
 * Keep descriptions concise but searchable.
@@ -135,7 +152,7 @@ Changes are flushed on every modifying command. Only an OS-level forced kill dur
 Not yet. Delete and re-add the task for now.
 
 **Q: Can I use spaces in the find keyword?**  
-No - `find` accepts a single word to keep search simple. You can use spaces front and back, provided there is no word (or letter) that follows behind. 
+No – `find` accepts exactly one word (no internal spaces). Leading or trailing whitespace is trimmed.
 
 ---
 Happy tasking with ChatTPG!
