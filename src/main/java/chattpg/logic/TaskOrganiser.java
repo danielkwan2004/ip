@@ -61,7 +61,7 @@ public class TaskOrganiser {
         System.out.println("  - [Delete a task]: delete task");
         System.out.println("  - [List all tasks]: list");
         System.out.println("  - [Exit Task Organiser]: exit task organiser or bye");
-        System.out.println("  - [Find a task based on a single keyword]: find <keyword>");
+        System.out.println("  - [Find a task based on a single keyword]: find ");
         System.out.println("Type 'help' to see this list again.");
         System.out.println(LINE);
     }

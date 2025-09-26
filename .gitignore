@@ -29,6 +29,3 @@ text-ui-test/
 
 # Manifest generated during packaging
 MANIFEST.MF
-
-# If you later want to keep specific VS Code recommendations, you can negate:
-# !.vscode/extensions.json
