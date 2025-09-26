@@ -66,7 +66,7 @@ public class TaskActions {
             System.out.println(lineSep);
             return;
         }
-        System.out.println("Here are the tasks in your list: ");
+        System.out.println("Here are the tasks in your list, \"X\" means it is marked done: ");
         for (int i = 0; i < tasks.size(); i++) {
             System.out.println("\t" + (i + 1) + ". " + tasks.get(i).toString());
         }
@@ -110,8 +110,12 @@ public class TaskActions {
             tasks.add(new Event(desc, start, end));
         } else if (description.startsWith("todo")) {
             String desc = description.substring("todo".length()).trim();
-            if (desc.isEmpty()) {
+            if (desc.charAt(0) != ' ') {
+                throw new InvalidCommandException("todo format: todo <desc>" + System.lineSeparator() + lineSep);
+            } else if (desc.isEmpty()) {
                 throw new InvalidCommandException("todo requires a description." + System.lineSeparator() + lineSep);
+            } else if (desc.contains("/by") || desc.contains("/from") || desc.contains("/to")) {
+                throw new InvalidCommandException("todo description must not contain /by, /from, or /to." + System.lineSeparator() + lineSep);
             }
             tasks.add(new Todo(desc));
         } else {

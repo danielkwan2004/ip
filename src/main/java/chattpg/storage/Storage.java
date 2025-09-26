@@ -12,15 +12,34 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Handles persistence of tasks to and from the hardcoded file path tasks/tasks.txt.
+ * File-backed persistence layer for ChatTPG tasks.
+ * <p>
+ * Format per line (pipe-delimited with spaces around the delimiter):
+ * <pre>
+ *   T | done(0|1) | description
+ *   D | done(0|1) | description | by
+ *   E | done(0|1) | description | from | to
+ * </pre>
+ * Missing file is treated as an empty task list. IO errors are logged to stdout.
  */
 public class Storage {
     private final File file;
 
+    /**
+     * Creates storage pointing at the given path. The parent directory will be
+     * created on save if it doesn't exist.
+     *
+     * @param filePath path to the task file (e.g., "tasks/tasks.txt")
+     */
     public Storage(String filePath) {
         this.file = new File(filePath);
     }
 
+    /**
+     * Loads all tasks from the file into memory.
+     *
+     * @return mutable list of tasks; empty if file is missing or unreadable
+     */
     public ArrayList<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
         if (!file.exists()) {
@@ -66,6 +85,12 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Saves the provided list of tasks to disk, overwriting the file.
+     * The parent directory will be created if necessary.
+     *
+     * @param tasks tasks to persist
+     */
     public void save(ArrayList<Task> tasks) {
         file.getParentFile().mkdirs();
         try (FileWriter writer = new FileWriter(file, false)) {
