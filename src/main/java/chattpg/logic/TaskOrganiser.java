@@ -55,12 +55,12 @@ public class TaskOrganiser {
     /** Prints available commands for quick reference. */
     public void printAvailableCommands() {
         System.out.println("Available commands:");
-        System.out.println("  - Add a task: todo <desc>, deadline <desc> /by <when>, event <desc> /from <start> /to <end>");
-        System.out.println("  - Mark task as done: mark done");
-        System.out.println("  - Mark task as undone: mark undone");
-        System.out.println("  - Delete a task: delete task");
-        System.out.println("  - List all tasks: list");
-        System.out.println("  - Exit Task Organiser: exit task organiser or bye");
+        System.out.println("  - [Add a task]: todo <desc>, deadline <desc> /by <when>, event <desc> /from <start> /to <end>");
+        System.out.println("  - [Mark task as done]: mark done");
+        System.out.println("  - [Mark task as undone]: mark undone");
+        System.out.println("  - [Delete a task]: delete task");
+        System.out.println("  - [List all tasks]: list");
+        System.out.println("  - [Exit Task Organiser]: exit task organiser or bye");
         System.out.println(LINE);
     }
 
