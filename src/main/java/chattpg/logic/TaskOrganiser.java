@@ -61,6 +61,8 @@ public class TaskOrganiser {
         System.out.println("  - [Delete a task]: delete task");
         System.out.println("  - [List all tasks]: list");
         System.out.println("  - [Exit Task Organiser]: exit task organiser or bye");
+        System.out.println("  - [Find a task based on a single keyword]: find <keyword>");
+        System.out.println("Type 'help' to see this list again.");
         System.out.println(LINE);
     }
 
@@ -159,7 +161,7 @@ public class TaskOrganiser {
                     System.out.println(LINE);
                     return;
                 case "find":
-                    System.out.println("Enter a single keyword to show a list of tasks that has that keyword in the description");
+                    System.out.println("Enter a single keyword to show a list of tasks that has that keyword in the description: ");
                     String keyword = scanner.nextLine().trim();
                     System.out.println(LINE);
                     findTask(keyword);

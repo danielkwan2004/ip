@@ -1,5 +1,4 @@
 package chattpg.model;
-import static chattpg.model.Task.requireNonBlank;
 
 /**
  * A {@link Task} with an associated deadline ("/by" value).

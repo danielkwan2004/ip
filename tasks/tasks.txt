@@ -6,4 +6,5 @@ T | 0 | play basketball
 T | 0 | aksjdf
 T | 0 | skf
 T | 0 | askjbfal
-T | 0 | askldfb
+E | 0 | part | tonight | tomorrow
+T | 0 | fold clothes

@@ -20,6 +20,8 @@ public class TaskActions {
     private final Storage storage;
     private final String lineSep;
     private boolean loaded = false;
+    private final String NEWLINE = System.lineSeparator();
+    private final String HELP_MESSAGE = NEWLINE + "Type help to see the full list of commands." + NEWLINE;
 
     /**
      * Constructs a new TaskActions facade.
@@ -91,7 +93,7 @@ public class TaskActions {
             description = description.substring("deadline".length()).trim();
             String[] parts = description.split(" /by ", 2);
             if (parts.length < 2) {
-                throw new InvalidCommandException("deadline format: deadline <desc> /by <when>" + System.lineSeparator() + lineSep);
+                throw new InvalidCommandException("deadline format: deadline <desc> /by <when>" + NEWLINE + lineSep + HELP_MESSAGE + lineSep);
             }
             tasks.add(new Deadline(parts[0].trim(), parts[1].trim()));
         } else if (description.startsWith("event")) {
@@ -99,27 +101,27 @@ public class TaskActions {
             int fromPos = description.indexOf(" /from ");
             int toPos = description.indexOf(" /to ");
             if (fromPos == -1 || toPos == -1 || fromPos > toPos) {
-                throw new InvalidCommandException("event format: event <desc> /from <start> /to <end>" + System.lineSeparator() + lineSep);
+                throw new InvalidCommandException("event format: event <desc> /from <start> /to <end>" + NEWLINE + lineSep + HELP_MESSAGE + lineSep);
             }
             String desc = description.substring(0, fromPos).trim();
             String start = description.substring(fromPos + 7, toPos).trim();
             String end = description.substring(toPos + 5).trim();
             if (desc.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                throw new InvalidCommandException("event parts must not be empty." + System.lineSeparator() + lineSep);
+                throw new InvalidCommandException("event parts must not be empty." + NEWLINE + lineSep + HELP_MESSAGE + lineSep);
             }
             tasks.add(new Event(desc, start, end));
         } else if (description.startsWith("todo")) {
             String desc = description.substring("todo".length()).trim();
-            if (desc.charAt(0) != ' ') {
-                throw new InvalidCommandException("todo format: todo <desc>" + System.lineSeparator() + lineSep);
+            if (description.charAt(4) != ' ') {
+                throw new InvalidCommandException("todo format: todo <desc>" + NEWLINE + lineSep + HELP_MESSAGE + lineSep);
             } else if (desc.isEmpty()) {
-                throw new InvalidCommandException("todo requires a description." + System.lineSeparator() + lineSep);
+                throw new InvalidCommandException("todo requires a description." + NEWLINE + lineSep + HELP_MESSAGE + lineSep);
             } else if (desc.contains("/by") || desc.contains("/from") || desc.contains("/to")) {
-                throw new InvalidCommandException("todo description must not contain /by, /from, or /to." + System.lineSeparator() + lineSep);
+                throw new InvalidCommandException("todo description must not contain /by, /from, or /to." + NEWLINE + "todo format: todo <desc>" + NEWLINE + lineSep + HELP_MESSAGE + lineSep);
             }
             tasks.add(new Todo(desc));
         } else {
-            throw new InvalidCommandException("Unknown command. Type help for available commands." + System.lineSeparator() + lineSep);
+            throw new InvalidCommandException("Unknown command. Type help for available commands." + NEWLINE + lineSep + HELP_MESSAGE + lineSep);
         }
         taskAdded();
         saveToFile();
@@ -132,13 +134,11 @@ public class TaskActions {
      * @throws TaskIndexOutOfBoundsException if the index is invalid
      */
     public void deleteTask(int taskNumber) throws TaskIndexOutOfBoundsException {
-        if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new TaskIndexOutOfBoundsException("Task " + taskNumber + " does not exist." + System.lineSeparator() + "You only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + lineSep);
-        }
+        Task task = getTaskByOneBasedIndex(taskNumber);
         int taskIndex = taskNumber - 1;
         System.out.printf("Noted. I've removed task number %d. The following is the name of the task: \n", taskNumber);
         System.out.println(lineSep);
-        System.out.println("  " + tasks.get(taskIndex));
+        System.out.println("  " + task);
         tasks.remove(taskIndex);
         System.out.println(lineSep);
         printNumberOfTasks();
@@ -153,14 +153,8 @@ public class TaskActions {
      * @throws IllegalStateException         if the state transition is not allowed
      */
     public void markDone(int taskNumber) throws TaskIndexOutOfBoundsException, IllegalStateException {
-        if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new TaskIndexOutOfBoundsException("Task " + taskNumber + " does not exist." + System.lineSeparator() + "You only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + lineSep);
-        }
-        tasks.get(taskNumber - 1).markTaskAsDone();
-        System.out.println("Nice! I've marked this task as done:");
-        System.out.println(lineSep);
-        System.out.println("\t" + tasks.get(taskNumber - 1));
-        saveToFile();
+        Task task = getTaskByOneBasedIndex(taskNumber);
+        changeTaskState(task, true, "Nice! I've marked this task as done:");
     }
 
     /**
@@ -171,14 +165,8 @@ public class TaskActions {
      * @throws IllegalStateException         if the state transition is not allowed
      */
     public void markUndone(int taskNumber) throws TaskIndexOutOfBoundsException, IllegalStateException {
-        if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new TaskIndexOutOfBoundsException("Task " + taskNumber + " does not exist." + System.lineSeparator() + "You only have " + tasks.size() + " tasks in your list." + System.lineSeparator() + lineSep);
-        }
-        tasks.get(taskNumber - 1).markTaskAsUndone();
-        System.out.println("Nice! I've marked this task as undone:");
-        System.out.println(lineSep);
-        System.out.println("\t" + tasks.get(taskNumber - 1));
-        saveToFile();
+        Task task = getTaskByOneBasedIndex(taskNumber);
+        changeTaskState(task, false, "Nice! I've marked this task as undone:");
     }
 
     /**
@@ -193,7 +181,7 @@ public class TaskActions {
             String trimmed = keyword == null ? "" : keyword.trim();
         // Must be exactly one non-whitespace token
         if (!trimmed.matches("\\S+")) {
-            throw new InvalidCommandException("Keyword must be a single word." + System.lineSeparator() + lineSep);
+            throw new InvalidCommandException("Keyword must be a single word." + NEWLINE + lineSep);
         }
         System.out.println("Here are the matching tasks in your list: ");
         int count = 0;
@@ -229,5 +217,39 @@ public class TaskActions {
             System.out.printf("Now you have %d tasks in the list.%n", tasks.size());
         }
         System.out.println(lineSep);
+    }
+
+    /**
+     * Returns the task for a 1-based index or throws if out of bounds.
+     */
+    private Task getTaskByOneBasedIndex(int taskNumber) throws TaskIndexOutOfBoundsException {
+        if (taskNumber < 1 || taskNumber > tasks.size()) {
+            throw new TaskIndexOutOfBoundsException("Task " + taskNumber + " does not exist." + NEWLINE + "You only have " + 
+            tasks.size() + " tasks in your list." + newLine() + "Type list to see all tasks." + NEWLINE + lineSep);
+        }
+        return tasks.get(taskNumber - 1);
+    }
+
+    /**
+     * Changes task state (done/undone) and prints a standardized confirmation.
+     *
+     * @param task the task to modify
+     * @param markDone whether to mark done (true) or undone (false)
+     * @param header message printed before showing the task
+     */
+    private void changeTaskState(Task task, boolean markDone, String header) {
+        if (markDone) {
+            task.markTaskAsDone();
+        } else {
+            task.markTaskAsUndone();
+        }
+        System.out.println(header);
+        System.out.println(lineSep);
+        System.out.println("\t" + task);
+        saveToFile();
+    }
+
+    private String newLine() {
+        return NEWLINE;
     }
 }

@@ -19,5 +19,7 @@ bin/
 
 ChatTPG.jar
 
-/.vscode/
+/.vscode/launch.json
+/.vscode/tasks.json
+/.vscode/settings.json
 *.class
