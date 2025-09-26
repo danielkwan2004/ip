@@ -19,7 +19,16 @@ bin/
 
 ChatTPG.jar
 
-/.vscode/launch.json
-/.vscode/tasks.json
-/.vscode/settings.json
 *.class
+
+# VS Code workspace settings (ignore entire folder)
+.vscode/
+
+# Ignore all text UI test artifacts (entire directory)
+text-ui-test/
+
+# Manifest generated during packaging
+MANIFEST.MF
+
+# If you later want to keep specific VS Code recommendations, you can negate:
+# !.vscode/extensions.json
